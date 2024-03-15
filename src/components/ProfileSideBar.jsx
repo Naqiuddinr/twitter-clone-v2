@@ -1,15 +1,21 @@
 import { Button, Col } from "react-bootstrap";
-import IconButton from "./IconButton";
 import { useState } from "react";
+
+import IconButton from "./IconButton";
 import NewPostModal from "./NewPostModal";
+import ChatBotModal from "./ChatBotModal";
 
 
 export default function ProfileSideBar({ handleLogout }) {
 
     const [show, setShow] = useState(false);
+    const [showChatBot, setShowChatBot] = useState(false)
 
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
+
+    const handleCloseChatBot = () => setShowChatBot(false);
+    const hadnleShowChatBot = () => setShowChatBot(true);
 
 
     return (
@@ -26,12 +32,13 @@ export default function ProfileSideBar({ handleLogout }) {
             <IconButton className="bi bi-bookmark" text="Bookmarks" />
             <IconButton className="bi bi-patch-check" text="Verified" />
             <IconButton className="bi bi-person" text="Profile" />
-            <IconButton className="bi bi-filter-circle" text="More" />
+            <IconButton className="bi bi-chat-square-text" text="Grok" onClick={hadnleShowChatBot} />
             <Button className="rounded-pill w-100 mb-3" variant="dark" onClick={handleShow}>
                 Post
             </Button>
 
             <NewPostModal show={show} handleClose={handleClose} />
+            <ChatBotModal show={showChatBot} handleClose={handleCloseChatBot} />
 
             <Button
                 className="light rounded-pill mt-auto mb-4 w-100"

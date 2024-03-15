@@ -1,7 +1,10 @@
-import { Button, Col, Image, Nav, Row } from "react-bootstrap";
 import ProfilePostCard from "./ProfilePostCard";
-import { useEffect, useState } from "react";
+import { fetchPostsByUser } from '../feature/posts/postsSlice'
+
+import { Button, Col, Image, Nav, Row, Spinner } from "react-bootstrap";
+import { useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
+import { useDispatch, useSelector } from "react-redux";
 
 
 export default function ProfileMidBody() {
@@ -9,35 +12,18 @@ export default function ProfileMidBody() {
     const url = 'https://pbs.twimg.com/profile_banners/83072625/1602845571/1500x500';
     const pic = 'https://pbs.twimg.com/profile_images/1587405892437221376/h167Jlb2_400x400.jpg'
 
-    const [posts, setPosts] = useState([])
-
-    async function fetchPosts(userId) {
-
-        try {
-            const response = await fetch(`https://85e26881-9d33-47ea-98c8-e946f60ddfca-00-1ciplofky6m83.spock.replit.dev/posts/users/${userId}`)
-
-            const data = await response.json();
-
-            setPosts(data)
-
-        } catch (err) {
-            console.error("Error: ", err)
-        }
-
-        // fetch(`https://85e26881-9d33-47ea-98c8-e946f60ddfca-00-1ciplofky6m83.spock.replit.dev/posts/users/${userId}`)
-        //     .then((response) => response.json())
-        //     .then((data) => setPosts(data))
-        //     .catch((error) => console.error("Error: ", error))
-    }
+    const dispatch = useDispatch();
+    const posts = useSelector((state) => state.posts.posts);
+    const loading = useSelector((state) => state.posts.loading);
 
     useEffect(() => {
         const token = localStorage.getItem("authToken");
         if (token) {
             const decodedToken = jwtDecode(token);
             const userId = decodedToken.id;
-            fetchPosts(userId);
+            dispatch(fetchPostsByUser(userId));
         }
-    }, [posts])
+    }, [dispatch])
 
     return (
         <Col sm={6} className="bg-light" style={{ border: "1px solid lightgrey" }}>
@@ -94,6 +80,9 @@ export default function ProfileMidBody() {
                     <Nav.Link eventKey="link-4" style={{ color: 'black' }}>Likes</Nav.Link>
                 </Nav.Item>
             </Nav>
+            {loading && (
+                <Spinner animation="border" className="ms-3 mt-3" variant="primary" />
+            )}
             {posts.length > 0 && posts.map((post) => (
                 <ProfilePostCard key={post.id} content={post.content} postId={post.id} />
             ))}

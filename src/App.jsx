@@ -1,9 +1,11 @@
 import AuthPage from "./pages/AuthPage";
 import ProfilePage from './pages/ProfilePage';
+import store from './store';
 
 import useLocalStorage from "use-local-storage";
 import { AuthContext } from "./feature/AuthContext";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { Provider } from "react-redux";
 
 export default function App() {
 
@@ -11,13 +13,15 @@ export default function App() {
 
   return (
     <AuthContext.Provider value={{ authToken, setAuthToken }}>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/login" element={<AuthPage />} />
-          <Route path="*" element={<AuthPage />} />
-        </Routes>
-      </BrowserRouter>
+      <Provider store={store}>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/login" element={<AuthPage />} />
+            <Route path="*" element={<AuthPage />} />
+          </Routes>
+        </BrowserRouter>
+      </Provider>
     </AuthContext.Provider>
   )
 }
