@@ -1,48 +1,59 @@
 import { useContext, useEffect, useState } from "react";
 import { Button, Col, Form, Image, Modal, Row } from "react-bootstrap";
 
-import axios from "axios";
+// import axios from "axios";
 import { AuthContext } from "../feature/AuthContext";
 import { useNavigate } from "react-router-dom";
+import {
+    createUserWithEmailAndPassword,
+    getAuth,
+    signInWithEmailAndPassword,
+    GoogleAuthProvider,
+    signInWithPopup,
+    sendPasswordResetEmail
+} from "firebase/auth";
 
 
 export default function AuthPage() {
 
     const loginImage = 'https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/x-social-media-black-icon.png'
-    const url = 'https://1e750291-564d-4a33-9063-bcbdde89125d-00-16uxgkua7cz9j.worf.replit.dev'
+    // const url = 'https://1e750291-564d-4a33-9063-bcbdde89125d-00-16uxgkua7cz9j.worf.replit.dev'
 
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
 
-    const authToken = useContext(AuthContext).authToken;
-    const setAuthToken = useContext(AuthContext).setAuthToken;
+    // const authToken = useContext(AuthContext).authToken;
+    // const setAuthToken = useContext(AuthContext).setAuthToken;
 
     const [modalShow, setModalShow] = useState(null);
     const handleShowSignUp = () => setModalShow("Signup")
     const handleShowLogin = () => setModalShow("Login");
-    const handleClose = () => setModalShow(null);
+    const handleClose = () => {
+        setModalShow(null)
+        setErrorMessage("")
+    };
 
     const navigate = useNavigate();
+    const auth = getAuth();
+    const { currentUser } = useContext(AuthContext);
+
+    const provider = new GoogleAuthProvider();
 
     useEffect(() => {
-        if (authToken) {
+        if (currentUser) {
             navigate("/profile")
         }
-    }, [authToken, navigate])
+    }, [currentUser, navigate])
 
     async function handleLogin(e) {
         e.preventDefault();
 
         try {
-            const response = await axios.post(`${url}/login`, { username, password });
-            if (response.data && response.data.auth === true && response.data.token) {
-                setAuthToken(response.data.token)
-                alert("Login was successful, token saved")
-            }
+            await signInWithEmailAndPassword(auth, username, password)
         } catch (err) {
-            console.error(err)
-        } finally {
-            handleClose();
+            console.log(err.code)
+            setErrorMessage("Wrong email/password, please check and try again")
         }
     }
 
@@ -50,12 +61,41 @@ export default function AuthPage() {
         e.preventDefault();
 
         try {
-            const response = await axios.post(`${url}/signup`, { username, password });
-            console.log(response.data)
+            const response = await createUserWithEmailAndPassword(
+                auth,
+                username,
+                password
+            );
+            console.log(response.user)
         } catch (err) {
-            console.error(err)
-        } finally {
-            handleClose();
+            if (err.code === 'auth/weak-password') {
+                setErrorMessage("Password should be at least 6 characters")
+            } else if (err.code === 'auth/email-already-in-use') {
+                setErrorMessage("Email already in use")
+            }
+        }
+    }
+
+    async function handleGoogleLogin(e) {
+        e.preventDefault();
+
+        try {
+            await signInWithPopup(auth, provider)
+
+        } catch (error) {
+            console.error(error)
+        }
+
+    }
+
+    async function handleResetPassword(e) {
+        e.preventDefault();
+
+        try {
+            const res = await sendPasswordResetEmail(auth, username)
+            console.log(res)
+        } catch (err) {
+            console.log(err)
         }
     }
 
@@ -69,7 +109,7 @@ export default function AuthPage() {
                     <h1 className="mt-5" style={{ fontSize: 64, fontWeight: "bold" }}>Happening now</h1>
                     <h1 className="my-5" style={{ fontSize: 31, fontWeight: "bold" }}>Join today</h1>
                     <Col sm={5} className="d-grid gap-2">
-                        <Button className="rounded-pill" variant="outline-dark">
+                        <Button className="rounded-pill" variant="outline-dark" onClick={handleGoogleLogin}>
                             <i className="bi bi-google"></i>  Sign up with Google
                         </Button>
                         <Button className="rounded-pill" variant="outline-dark">
@@ -124,10 +164,14 @@ export default function AuthPage() {
                             <Button className="rounded-pill" variant="secondary" type="submit">
                                 {modalShow === "Signup" ? "Sign Up" : "Log In"}
                             </Button>
+                            <div className="mt-4 text-danger">{errorMessage}</div>
+                            {errorMessage === "Wrong email/password, please check and try again" && (
+                                <p className="mt-3 text-muted">Reset password? Click <a href="" onClick={handleResetPassword}>here</a></p>
+                            )}
                         </Form>
                     </Modal.Body>
                 </Modal>
             </Row>
-        </div>
+        </div >
     )
 }
