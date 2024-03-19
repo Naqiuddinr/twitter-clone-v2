@@ -13,6 +13,9 @@ import {
     sendPasswordResetEmail
 } from "firebase/auth";
 
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 export default function AuthPage() {
 
@@ -96,6 +99,9 @@ export default function AuthPage() {
             console.log(res)
         } catch (err) {
             console.log(err)
+        } finally {
+            handleClose();
+            toast("Please check your email");
         }
     }
 
@@ -171,6 +177,19 @@ export default function AuthPage() {
                         </Form>
                     </Modal.Body>
                 </Modal>
+                <ToastContainer
+                    position="top-center"
+                    autoClose={5000}
+                    hideProgressBar
+                    newestOnTop={false}
+                    closeOnClick
+                    rtl={false}
+                    pauseOnFocusLoss
+                    draggable
+                    pauseOnHover
+                    theme="light"
+                    transition:Bounce
+                />
             </Row>
         </div >
     )
