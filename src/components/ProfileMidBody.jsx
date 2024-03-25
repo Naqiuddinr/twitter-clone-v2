@@ -24,6 +24,8 @@ export default function ProfileMidBody() {
         dispatch(fetchPostsByUser(currentUser.uid));
     }, [dispatch, currentUser])
 
+    console.log(posts)
+
     // useEffect(() => {
     //     const token = localStorage.getItem("authToken");
     //     if (token) {

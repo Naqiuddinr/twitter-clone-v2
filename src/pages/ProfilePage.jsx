@@ -1,10 +1,10 @@
 
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import { Container, Row } from "react-bootstrap";
 import { AuthContext } from "../feature/AuthContext";
 import { useNavigate } from "react-router-dom";
 
-import { getAuth } from 'firebase/auth'
+import { getAuth, signOut } from 'firebase/auth'
 
 import ProfileSideBar from '../components/ProfileSideBar'
 import ProfileMidBody from '../components/ProfileMidBody'
@@ -19,14 +19,12 @@ export default function ProfilePage() {
     const auth = getAuth();
     const { currentUser } = useContext(AuthContext)
 
-    useEffect(() => {
-        if (!currentUser) {
-            navigate("/login");
-        }
-    }, [currentUser, navigate]);
+    if (!currentUser) {
+        navigate("/login");
+    }
 
     function handleLogout() {
-        auth.signOut()
+        signOut(auth)
     }
 
     return (
